@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Switch
+        android:id="@+id/monitor_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enable Monitoring" />
+
+    <EditText
+        android:id="@+id/app_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter App Package Name" />
+
+    <Button
+        android:id="@+id/add_app_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add App" />
+
+    <Button
+        android:id="@+id/remove_app_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Remove App" />
+
+    <Button
+        android:id="@+id/show_apps_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show Restricted Apps" />
+
+    <Button
+        android:id="@+id/view_logs_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Logs" />
+
+</LinearLayout>

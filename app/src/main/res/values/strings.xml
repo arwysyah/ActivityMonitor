@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AccessibilityMonitor</string>
+    <string name="accessibility_service_description">Monitors restricted apps usage</string>
+    <string name="request_wi_fi_permission">Request Wi-Fi Permission</string>
+    <string name="select_apps_for_restriction">Select Apps for restriction</string>
+    <string name="request_notification_permission">Request Notification Permission</string>
+    <string name="open_accessibility_settings">Open Accessibility Settings</string>
+    <string name="accessibility_service_status">Accessibility Service Status</string>
+</resources>
