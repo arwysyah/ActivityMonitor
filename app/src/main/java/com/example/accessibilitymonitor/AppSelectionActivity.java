@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -56,7 +57,10 @@ public class AppSelectionActivity extends AppCompatActivity {
         // Set adapter
         AppListAdapter adapter = new AppListAdapter(this, appList, selectedApps);
         appsListView.setAdapter(adapter);
-
+        ImageButton goBackButton = findViewById(R.id.go_back_button);
+        goBackButton.setOnClickListener(v -> {
+            getOnBackPressedDispatcher().onBackPressed();
+        });
         // Check for usage stats permission
         if (!hasUsageStatsPermission()) {
             requestUsageStatsPermission();

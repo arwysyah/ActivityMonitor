@@ -6,4 +6,5 @@
     <string name="request_notification_permission">Request Notification Permission</string>
     <string name="open_accessibility_settings">Open Accessibility Settings</string>
     <string name="accessibility_service_status">Accessibility Service Status</string>
+    <string name="go_back">go back</string>
 </resources>
