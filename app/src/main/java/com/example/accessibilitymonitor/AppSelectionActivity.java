@@ -1,184 +1,174 @@
 package com.example.accessibilitymonitor;
 
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
+import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+
+
 
 public class AppSelectionActivity extends AppCompatActivity {
     private static final String TAG = "AppSelectionActivity";
-    private static final String PREF_NAME = "AppPrefs";
-    private static final String RESTRICTED_APPS_KEY = "restricted_apps";
 
     private final List<AppInfo> appList = new ArrayList<>();
-    private Set<String> selectedApps = new HashSet<>();
+    private HashMap<String, String> selectedRestrictions = new HashMap<>();
+    private HashMap<String, String> originalRestrictions = new HashMap<>(); // To track the original state
     private SharedPreferences prefs;
+    private Button saveButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_selection);
 
-        ListView appsListView = findViewById(R.id.apps_list_view);
-        prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
 
-        // Load previously selected apps
-        selectedApps = new HashSet<>(prefs.getStringSet(RESTRICTED_APPS_KEY, new HashSet<>()));
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        // Load all installed apps
+        // Enable the up button (back arrow)
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        // Handle back arrow click
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        // UI References
+        RecyclerView appsRecyclerView = findViewById(R.id.apps_recycler_view);
+
+        saveButton = findViewById(R.id.save_button); // Save button reference
+
+        // Go back button action
+
+
+        // Initialize SharedPreferences
+        prefs = getSharedPreferences(Constant.getPrefName(), Context.MODE_PRIVATE);
+
+        // Load previously selected restrictions
+        loadSelectedRestrictions();
+
+        // Load installed apps
         loadInstalledApps();
 
-        // Set adapter
-        AppListAdapter adapter = new AppListAdapter(this, appList, selectedApps);
-        appsListView.setAdapter(adapter);
-        ImageButton goBackButton = findViewById(R.id.go_back_button);
-        goBackButton.setOnClickListener(v -> {
-            getOnBackPressedDispatcher().onBackPressed();
+        // Setup RecyclerView
+        AppListAdapter adapter = new AppListAdapter(this, appList, selectedRestrictions, this::onRestrictionsChanged);
+        appsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        appsRecyclerView.setAdapter(adapter);
+
+        // Initially disable save button and set color
+        setSaveButtonState(false);
+
+        // Save button action
+        saveButton.setOnClickListener(v -> {
+            saveSelectedRestrictions();
+            setSaveButtonState(false); // Disable after saving
+            Toast.makeText(this, "Restrictions saved successfully", Toast.LENGTH_SHORT).show();
         });
-        // Check for usage stats permission
-        if (!hasUsageStatsPermission()) {
-            requestUsageStatsPermission();
+    }
+
+    /**
+     * Callback for restriction changes in the adapter
+     */
+    private void onRestrictionsChanged() {
+        if (!selectedRestrictions.equals(originalRestrictions)) {
+            setSaveButtonState(true); // Enable button if there are changes
+        } else {
+            setSaveButtonState(false); // Disable button if there are no changes
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Save selected apps to SharedPreferences
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putStringSet(RESTRICTED_APPS_KEY, selectedApps);
-        editor.apply();
-        Log.d(TAG, "Selected apps saved: " + selectedApps);
+    /**
+     * Sets the save button state and color
+     * @param enabled true to enable, false to disable
+     */
+    private void setSaveButtonState(boolean enabled) {
+        saveButton.setEnabled(enabled);
+        if (enabled) {
+            saveButton.setBackgroundColor(getResources().getColor(R.color.button_enabled)); // Color when enabled
+        } else {
+            saveButton.setBackgroundColor(getResources().getColor(R.color.button_disabled)); // Color when disabled
+        }
     }
 
+    /**
+     * Loads the user's previously saved restrictions from SharedPreferences.
+     */
+    private void loadSelectedRestrictions() {
+        String json = prefs.getString(Constant.getWifiRestrictedAppsKey(), "{}");
+        try {
+            Type type = new TypeToken<HashMap<String, String>>() {}.getType();
+            selectedRestrictions = new Gson().fromJson(json, type);
+
+            if (selectedRestrictions == null) {
+                selectedRestrictions = new HashMap<>();
+            }
+
+            // Save a copy of the initial restrictions
+            originalRestrictions = new HashMap<>(selectedRestrictions);
+        } catch (Exception e) {
+            Log.e(TAG, "Error deserializing selected restrictions: ", e);
+            selectedRestrictions = new HashMap<>();
+        }
+
+        Log.d(TAG, "Selected restrictions loaded: " + selectedRestrictions);
+    }
+
+    /**
+     * Saves the selected restrictions to SharedPreferences.
+     */
+    private void saveSelectedRestrictions() {
+        if (selectedRestrictions == null) {
+            selectedRestrictions = new HashMap<>();
+        }
+
+        SharedPreferences.Editor editor = prefs.edit();
+        String json = new Gson().toJson(selectedRestrictions);
+        editor.putString(Constant.getWifiRestrictedAppsKey(), json);
+        editor.apply();
+
+        Log.d(TAG, "Selected restrictions saved: " + selectedRestrictions);
+
+        // Update the original restrictions after saving
+        originalRestrictions = new HashMap<>(selectedRestrictions);
+    }
+
+    /**
+     * Loads the list of installed apps on the device.
+     */
     private void loadInstalledApps() {
         PackageManager pm = getPackageManager();
-        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> resolvedApps = pm.queryIntentActivities(
+                new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0);
 
-        List<ResolveInfo> resolvedApps = pm.queryIntentActivities(mainIntent, 0);
         for (ResolveInfo resolveInfo : resolvedApps) {
-            String appName = resolveInfo.loadLabel(pm).toString();
+            String appName = resolveInfo.loadLabel(pm) != null
+                    ? resolveInfo.loadLabel(pm).toString()
+                    : "Unknown App";
             String packageName = resolveInfo.activityInfo.packageName;
             Drawable appIcon = resolveInfo.loadIcon(pm);
 
             appList.add(new AppInfo(appName, packageName, appIcon));
         }
+
         Log.d(TAG, "Installed apps loaded: " + appList.size());
-    }
-
-    private boolean hasUsageStatsPermission() {
-        UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
-        List<UsageStats> stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, 0, System.currentTimeMillis());
-        return stats != null && !stats.isEmpty();
-    }
-
-    private void requestUsageStatsPermission() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Permission Required")
-                .setMessage("This app requires usage access to monitor app usage. Please enable it in the settings.")
-                .setPositiveButton("Open Settings", (dialog, which) -> {
-                    Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                    startActivity(intent);
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    Toast.makeText(this, "Usage stats permission is required to monitor apps.", Toast.LENGTH_SHORT).show();
-                })
-                .show();
-    }
-
-    private static class AppInfo {
-        String name;
-        String packageName;
-        Drawable icon;
-
-        AppInfo(String name, String packageName, Drawable icon) {
-            this.name = name;
-            this.packageName = packageName;
-            this.icon = icon;
-        }
-    }
-
-    private static class AppListAdapter extends BaseAdapter {
-        private final Context context;
-        private final List<AppInfo> appList;
-        private final Set<String> selectedApps;
-
-        AppListAdapter(Context context, List<AppInfo> appList, Set<String> selectedApps) {
-            this.context = context;
-            this.appList = appList;
-            this.selectedApps = selectedApps;
-        }
-
-        @Override
-        public int getCount() {
-            return appList.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return appList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(context).inflate(R.layout.item_app_info, parent, false);
-            }
-
-            AppInfo appInfo = appList.get(position);
-
-            ImageView appIcon = convertView.findViewById(R.id.app_icon);
-            TextView appName = convertView.findViewById(R.id.app_name);
-            TextView appPackage = convertView.findViewById(R.id.app_package);
-            CheckBox appCheckBox = convertView.findViewById(R.id.app_checkbox);
-
-            appIcon.setImageDrawable(appInfo.icon);
-            appName.setText(appInfo.name);
-            appPackage.setText(appInfo.packageName);
-            appCheckBox.setChecked(selectedApps.contains(appInfo.packageName));
-
-            appCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    selectedApps.add(appInfo.packageName);
-                } else {
-                    selectedApps.remove(appInfo.packageName);
-                }
-                Log.d("AppListAdapter", "App selection changed: " + appInfo.packageName + " -> " + isChecked);
-            });
-
-            return convertView;
-        }
     }
 }

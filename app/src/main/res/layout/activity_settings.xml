@@ -21,24 +21,28 @@
         android:id="@+id/add_app_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/CustomButton"
         android:text="Add App" />
 
     <Button
         android:id="@+id/remove_app_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/CustomButton"
         android:text="Remove App" />
 
     <Button
         android:id="@+id/show_apps_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/CustomButton"
         android:text="Show Restricted Apps" />
 
     <Button
         android:id="@+id/view_logs_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/CustomButton"
         android:text="View Logs" />
 
 </LinearLayout>

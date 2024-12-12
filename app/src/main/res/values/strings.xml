@@ -7,4 +7,14 @@
     <string name="open_accessibility_settings">Open Accessibility Settings</string>
     <string name="accessibility_service_status">Accessibility Service Status</string>
     <string name="go_back">go back</string>
+    <string name="todo">TODO</string>
+    <string name="save">Save</string>
+
+    <string-array name="restriction_options">
+            <item>None</item>
+            <item>Wi-Fi</item>
+            <item>Cellular</item>
+            <item>Wi-Fi and Cellular</item>
+        </string-array>
+
 </resources>

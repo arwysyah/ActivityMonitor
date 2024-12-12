@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.os.Build;
@@ -20,10 +21,11 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView statusText;
     private Button requestNotificationButton;
-
+    private  AuthDatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        dbHelper = new AuthDatabaseHelper(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -32,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         requestNotificationButton = findViewById(R.id.request_notification_button);
        Button selectionAppsButton = findViewById(R.id.selection_apps_button);
         Button openSettingsButton = findViewById(R.id.open_settings_button); // New button
-
+        Button logoutButton = findViewById(R.id.logout_button);
         // Check and display the status of the Accessibility Service
         updateAccessibilityStatus();
 
@@ -42,6 +44,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Enable the Accessibility Service for this app", Toast.LENGTH_LONG).show();
         });
 
+        logoutButton.setOnClickListener(view -> {
+            logout();
+        });
+
         // Request notification permissions if required
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             checkNotificationPermission();
@@ -49,8 +55,15 @@ public class MainActivity extends AppCompatActivity {
             requestNotificationButton.setEnabled(false);
         }
         selectionAppsButton.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this,AppSelectionActivity.class);
-            startActivity(intent);
+            boolean isEnabled = isAccessibilityServiceEnabled(this, AppMonitorService.class);
+            if(isEnabled){
+                Intent intent = new Intent(MainActivity.this,AppSelectionActivity.class);
+                startActivity(intent);
+            }else{
+                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                startActivity(intent);
+            }
+
         });
         openSettingsButton.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -86,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void updateAccessibilityStatus() {
         boolean isEnabled = isAccessibilityServiceEnabled(this, AppMonitorService.class);
         statusText.setText(isEnabled ? "Accessibility Service is enabled." : "Accessibility Service is disabled.");
@@ -107,5 +121,20 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+    private void logout() {
+        // Clear token from SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
+        String token = prefs.getString("auth_token", null);
+
+        if (token != null) {
+            dbHelper.logout(token);
+        }
+        prefs.edit().clear().apply();
+
+        // Navigate back to Login screen
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

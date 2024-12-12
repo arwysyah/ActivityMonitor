@@ -1,0 +1,28 @@
+<resources>
+    <style name="NoActionBarTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="buttonStyle">@style/CustomButton</item>
+    </style>
+
+    <style name="CustomButton" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/blue</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">16dp</item> <!-- Rounded corners -->
+    </style>
+    <style name="CustomTextInput" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/white</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">16dp</item> <!-- Rounded corners -->
+    </style>
+    <style name="CustomErrorButton" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/red</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">8dp</item> <!-- Rounded corners -->
+    </style>
+    <style name="RoundedButton" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">30dp</item> <!-- Rounded corners -->
+    </style>
+
+
+</resources>

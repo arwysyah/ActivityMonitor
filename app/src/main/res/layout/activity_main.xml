@@ -7,10 +7,10 @@
     android:padding="16dp"
     android:gravity="center_horizontal">
 
-    <!-- Accessibility Status Text -->
     <TextView
         android:id="@+id/status_text"
         android:layout_width="wrap_content"
+        style="@style/CustomButton"
         android:layout_height="wrap_content"
         android:text="@string/accessibility_service_status"
         android:textSize="18sp"
@@ -21,6 +21,7 @@
         android:id="@+id/open_accessibility_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/CustomButton"
         android:text="@string/open_accessibility_settings"
         android:layout_marginBottom="16dp" />
 
@@ -29,25 +30,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/request_notification_permission"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+/>
 
     <!-- Request Wi-Fi Permission Button -->
-    <Button
-        android:id="@+id/request_wifi_permission_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/request_wi_fi_permission"
-        android:layout_marginBottom="16dp" />
+<!--    <Button-->
+<!--        android:id="@+id/request_wifi_permission_button"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@string/request_wi_fi_permission"-->
+<!--        android:layout_marginBottom="16dp" />-->
 
     <Button
         android:id="@+id/selection_apps_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/select_apps_for_restriction"
+        style="@style/CustomButton"
         android:layout_marginBottom="16dp" />
     <Button
         android:id="@+id/open_settings_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/CustomButton"
         android:text="Open Monitoring Settings" />
+
+    <Button
+        android:id="@+id/logout_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:paddingVertical="8dp"
+        style="@style/CustomErrorButton"
+        android:text="Logout" />
+
 </LinearLayout>
